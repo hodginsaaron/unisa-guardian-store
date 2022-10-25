@@ -114,6 +114,7 @@ const memory = require('./routes/memory')
 const chatbot = require('./routes/chatbot')
 const locales = require('./data/static/locales.json')
 const i18n = require('i18n')
+const csurf = require('csurf')
 
 const appName = config.get('application.customMetricsPrefix')
 const startupGauge = new client.Gauge({
@@ -136,7 +137,7 @@ void collectDurationPromise('cleanupFtpFolder', require('./lib/startup/cleanupFt
 void collectDurationPromise('validateConfig', require('./lib/startup/validateConfig'))()
 
 // Reloads the i18n files in case of server restarts or starts.
-async function restoreOverwrittenFilesWithOriginals () {
+async function restoreOverwrittenFilesWithOriginals() {
   await collectDurationPromise('restoreOverwrittenFilesWithOriginals', require('./lib/startup/restoreOverwrittenFilesWithOriginals'))()
 }
 
@@ -257,6 +258,22 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.use(express.static(path.resolve('frontend/dist/frontend')))
   app.use(cookieParser('kekse'))
   // vuln-code-snippet end directoryListingChallenge accessLogDisclosureChallenge
+  interface TokenRequest extends Request {
+    csrfToken: any
+  }
+
+  // configure csrf protection
+  const csrfProtection = csurf({
+    cookie: true,
+    // ignore non-mutating methods
+    ignoreMethods: ['GET', 'HEAD', 'OPTIONS']
+  })
+
+  // add csrf token to default header
+  app.use(csrfProtection, (req: TokenRequest, res: {cookie: (tokenName: string, token: any, config: { httpOnly: boolean }) => void}, next: NextFunction): void => {
+    res.cookie('XSRF-TOKEN', req.csrfToken(), { httpOnly: false })
+    next()
+  })
 
   /* Configure and enable backend-side i18n */
   i18n.configure({
@@ -276,7 +293,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.post('/rest/memories', uploadToDisk.single('image'), ensureFileIsPassed, security.appendUserId(), metrics.observeFileUploadMetricsMiddleware(), memory.addMemory())
 
   app.use(bodyParser.text({ type: '*/*' }))
-  app.use(function jsonParser (req: Request, res: Response, next: NextFunction) {
+  app.use(function jsonParser(req: Request, res: Response, next: NextFunction) {
     // @ts-expect-error
     req.rawBody = req.body
     if (req.headers['content-type']?.includes('application/json')) {
@@ -305,7 +322,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.use('/rest/user/reset-password', new RateLimit({
     windowMs: 5 * 60 * 1000,
     max: 100,
-    keyGenerator ({ headers, ip }: { headers: any, ip: any }) { return headers['X-Forwarded-For'] || ip } // vuln-code-snippet vuln-line resetPasswordMortyChallenge
+    keyGenerator({ headers, ip }: { headers: any, ip: any }) { return headers['X-Forwarded-For'] || ip } // vuln-code-snippet vuln-line resetPasswordMortyChallenge
   }))
   // vuln-code-snippet end resetPasswordMortyChallenge
 
@@ -652,7 +669,7 @@ const registerWebsocketEvents = require('./lib/startup/registerWebsocketEvents')
 const customizeApplication = require('./lib/startup/customizeApplication')
 const customizeEasterEgg = require('./lib/startup/customizeEasterEgg') // vuln-code-snippet hide-line
 
-export async function start (readyCallback: Function) {
+export async function start(readyCallback: Function) {
   const datacreatorEnd = startupGauge.startTimer({ task: 'datacreator' })
   await sequelize.sync({ force: true })
   await datacreator()
@@ -676,7 +693,7 @@ export async function start (readyCallback: Function) {
   void collectDurationPromise('customizeEasterEgg', customizeEasterEgg)() // vuln-code-snippet hide-line
 }
 
-export function close (exitCode: number | undefined) {
+export function close(exitCode: number | undefined) {
   if (server) {
     clearInterval(metricsUpdateLoop)
     server.close()

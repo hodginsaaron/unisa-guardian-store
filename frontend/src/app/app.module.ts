@@ -5,7 +5,7 @@
 
 import { BrowserModule } from '@angular/platform-browser'
 import { NgModule } from '@angular/core'
-import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule } from '@angular/common/http'
+import { HTTP_INTERCEPTORS, HttpClient, HttpClientModule, HttpClientXsrfModule } from '@angular/common/http'
 import { CookieModule, CookieService } from 'ngx-cookie'
 import { ReactiveFormsModule } from '@angular/forms'
 import { Routing } from './app.routing'
@@ -215,6 +215,7 @@ export function HttpLoaderFactory (http: HttpClient) {
     MatPasswordStrengthModule.forRoot(),
     FlexLayoutModule,
     HttpClientModule,
+    HttpClientXsrfModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
     SlideshowModule,
