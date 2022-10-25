@@ -11,12 +11,11 @@ const HEADER_NAME = 'X-XSRF-TOKEN'
 
 @Injectable()
 export class RequestInterceptor implements HttpInterceptor {
-  constructor(private readonly tokenExtractor: HttpXsrfTokenExtractor) {
+  constructor (private readonly tokenExtractor: HttpXsrfTokenExtractor) {
   }
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept (req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-      
       const token = this.tokenExtractor.getToken()
 
       if (token !== null && !req.headers.has(HEADER_NAME)) {
