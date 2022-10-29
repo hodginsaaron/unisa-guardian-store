@@ -64,7 +64,7 @@
     "protractor": "npm run e2e",
     "serve": "export NODE_ENV=guardian-store && concurrently --kill-others \"export NODE_ENV=guardian-store && ts-node app.ts\" \"export NODE_ENV=guardian-store && cd frontend && ng serve\"",
     "serve:dev": "export NODE_ENV=guardian-store && concurrently --kill-others \"export NODE_ENV=guardian-store && ts-node-dev app.ts\" \"export NODE_ENV=guardian-store && cd frontend && ng serve\"",
-    "start": "SET NODE_ENV=guardian-store && node build/app",
+    "start": "set NODE_ENV=guardian-store && node build/app",
     "test": "cd frontend && ng test --watch=false --source-map=true && cd .. && npm run test:server",
     "test:chromium": "cd frontend && ng test --watch=false --source-map=false --browsers=ChromiumHeadless && cd .. && npm run test:server",
     "test:server": "nyc --report-dir=./build/reports/coverage/server-tests mocha -r ts-node/register -r source-map-support/register --recursive test/server/**/*.ts",
@@ -260,7 +260,8 @@
     "ts-jest": "^26.5.0",
     "ts-node": "^10.8.0",
     "typescript": "~4.6.0",
-    "webdriver-manager": "^13.0.0"
+    "webdriver-manager": "^13.0.0",
+    "@angular/cli": "13.0.0"
   },
   "engines": {
     "node": "14 - 18"
