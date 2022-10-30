@@ -7,6 +7,7 @@ import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpXsrfTokenExtr
 import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 
+// Token name set by angular HttpClientXsrfModule
 const HEADER_NAME = 'X-XSRF-TOKEN'
 
 @Injectable()
@@ -15,8 +16,9 @@ export class RequestInterceptor implements HttpInterceptor {
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // if request is a data mutating operation
+    // set the XSRF Header
     if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-      
       const token = this.tokenExtractor.getToken()
 
       if (token !== null && !req.headers.has(HEADER_NAME)) {
