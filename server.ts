@@ -258,8 +258,13 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.use(express.static(path.resolve('frontend/dist/frontend')))
   app.use(cookieParser('kekse'))
   // vuln-code-snippet end directoryListingChallenge accessLogDisclosureChallenge
+  
   interface TokenRequest extends Request {
     csrfToken: any
+  }
+
+  interface CookieResponse {
+    cookie: (tokenName: string, token: any, config: { httpOnly: boolean }) => void
   }
 
   // configure csrf protection
@@ -270,7 +275,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   })
 
   // add csrf token to default header
-  app.use(csrfProtection, (req: TokenRequest, res: {cookie: (tokenName: string, token: any, config: { httpOnly: boolean }) => void}, next: NextFunction): void => {
+  app.use(csrfProtection, (req: TokenRequest, res: CookieResponse, next: NextFunction): void => {
     res.cookie('XSRF-TOKEN', req.csrfToken(), { httpOnly: false })
     next()
   })
